@@ -1,0 +1,94 @@
+spring:
+  application:
+    name: park24-backend
+
+  cloud:
+     aws:
+      credentials:
+       access-key: your key
+       secret-key: your key
+      region:
+       static: ap-south-1
+      s3:
+       bucket: park24-properties-bucket
+
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/annarox
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update        # Flyway handles schema, not Hibernate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+      # jakarta:
+      #   persistence:
+      #     schema-generation:
+      #       scripts:
+      #         action: create
+      #         create-target: ./temp_schema.sql
+      #       create-source: metadata  
+
+
+  flyway:
+    enabled: false #true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  # data:
+  #   redis:
+  #     host: localhost
+  #     port: 6379
+  #     timeout: 2000ms
+
+  # kafka:
+  #   bootstrap-servers: localhost:9092
+  #   producer:
+  #     key-serializer: org.apache.kafka.common.serialization.StringSerializer
+  #     value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  #   consumer:
+  #     group-id: park24-group
+  #     auto-offset-reset: earliest
+  #     key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  #     value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+  #     properties:
+  #       spring.json.trusted.packages: "com.annarox.shared.event"
+
+server:
+  port: 8080
+
+jwt:
+  secret: ahgvasdchbalcaufhbvkjancucfdehwe8r84r4fjbvew
+  expiry-ms: 3600000        # 1 hour
+  refresh-expiry-ms: 86400000  # 24 hours
+
+# app:
+#   rate-limit:
+#     requests-per-minute: 100
+#   idempotency:
+#     ttl-hours: 24
+
+logging:
+  level:
+    com.annarox: DEBUG
+    # com.flyway-db: INFO
+    # org.springframework.kafka: INFO
+
+springdoc:
+  # Changes the default /swagger-ui/index.html to /swagger-ui.html
+  swagger-ui:
+    path: /swagger-ui.html
+    # Keeps your API operations sorted alphabetically
+    operations-sorter: alpha
+    # Enables the "Try it out" button by default
+    try-it-out-enabled: true
+  # Changes the JSON documentation path (default is /v3/api-docs)
+  api-docs:
+    path: /api-docs
+  # Shows the time it took for the request to complete in the UI
+  show-actuator: true

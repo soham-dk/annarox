@@ -1,0 +1,16 @@
+-- V1__Initial_Setup_Users.sql
+
+CREATE TABLE IF NOT EXISTS users (
+    user_id Long PRIMARY KEY,
+    username VARCHAR(20) NOT NULL UNIQUE,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone_number VARCHAR(15) NOT NULL UNIQUE,
+    password_hash VARCHAR(100) NOT NULL,
+    kyc_status VARCHAR(20) NOT NULL DEFAULT 'UNVERIFIED',
+    created_at TIMESTAMP(6) WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP(6) WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT users_kyc_status_check CHECK (kyc_status IN ('PENDING', 'VERIFIED', 'UNVERIFIED', 'REJECTED', 'EXPIRED'))
+);

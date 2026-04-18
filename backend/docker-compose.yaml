@@ -1,0 +1,53 @@
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: park24-postgres
+    environment:
+      POSTGRES_DB: park24
+      POSTGRES_USER: park24_user
+      POSTGRES_PASSWORD: park24_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: park24-redis
+  #   ports:
+  #     - "6379:6379"
+
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:7.5.0
+  #   container_name: park24-zookeeper
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+
+  # kafka:
+  #   image: confluentinc/cp-kafka:7.5.0
+  #   container_name: park24-kafka
+  #   depends_on:
+  #     - zookeeper
+  #   ports:
+  #     - "9092:9092"
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: park24-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@park24.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres    
+
+volumes:
+  postgres_data:

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,6 +20,7 @@ import org.springframework.web.cors.CorsConfiguration;
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity 
 public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -47,14 +49,15 @@ public class SecurityConfiguration {
                         "/webjars/**")
                 .permitAll()
                  //public APIs                
-                .requestMatchers("/api/v1/users/**").permitAll()
+//                .requestMatchers("/api/v1/users/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/users/register").permitAll()
                 .requestMatchers("/api/v1/auth/login").permitAll()
 //                .requestMatchers("api/v1/rounds/**").permitAll()
 //                .requestMatchers("/api/v1/wallet/**").permitAll()
 //                .requestMatchers("/api/v1/bets/**").permitAll()    
 //                .requestMatchers("api/v1/payment-requests/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/rounds/current").hasAnyRole("USER", "ADMIN","MANAGER")
-                
+                .requestMatchers("/api/v1/users/**").authenticated() 
 
                 .requestMatchers("/api/v1/rounds/*/close").hasRole("ADMIN")
                 // ADMIN APIs

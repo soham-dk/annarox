@@ -142,6 +142,13 @@ export default function ManagerPage() {
   // ─── Fetch users ──────────────────────────────────
 
   const fetchUsers = async () => {
+    const token = authService.getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    } else {
+      setLoading(false);
+    }
     try {
       const res = await managerService.getUsers();
       setUsers(res.data.data ?? []);
@@ -152,6 +159,13 @@ export default function ManagerPage() {
     }
   };
   const fetchWithdrawRequests = async () => {
+    const token = authService.getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    } else {
+      setLoading(false);
+    }
     try {
       const res: any = await managerService.getWithdrawalRequests();
       if (res.data && res.data.success) {

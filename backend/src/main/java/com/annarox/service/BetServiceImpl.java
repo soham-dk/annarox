@@ -18,6 +18,8 @@ import com.annarox.enums.RoundStatus;
 import com.annarox.enums.TransactionReference;
 import com.annarox.enums.TransactionStatus;
 import com.annarox.enums.TransactionType;
+import com.annarox.enums.UserStatus;
+import com.annarox.exception.BadRequestException;
 import com.annarox.exception.BusinessException;
 import com.annarox.exception.NotFoundException;
 import com.annarox.repository.BetRepository;
@@ -49,6 +51,10 @@ public class BetServiceImpl implements BetService {
 
 		User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
 
+		if (!user.getStatus().equals(UserStatus.ACTIVE)) {
+		    throw new BadRequestException("User account is not active. Betting is disabled.");
+		}
+		
 		// Debit wallet first
 		walletService.processTransaction(user, dto.getTokens(), TransactionType.DEBIT, TransactionReference.BET_PLACED,
 				user, TransactionStatus.SUCCESS);

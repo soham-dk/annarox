@@ -1,6 +1,7 @@
 package com.annarox.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +29,6 @@ public class UserController {
 
     @PostMapping("/register")
     public ApiResponseDTO<?> registerUser(@Valid @RequestBody UserRegistrationDTO user) {
-    	System.out.println("REGISTER USER : "+user.toString());
         UserResponseDTO registeredUser = userService.registerUser(user);
         return ApiResponseDTO.ok(
                 registeredUser,
@@ -45,6 +45,7 @@ public class UserController {
     }
     
     @GetMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ApiResponseDTO<?> getAllUsers() {
         return ApiResponseDTO.ok(
                 userService.getAllUsers(),
@@ -53,8 +54,8 @@ public class UserController {
     }
     
     @PostMapping("/status")
+    @PreAuthorize("hasRole('MANAGER')")
     public ApiResponseDTO<?> updateStatus(@RequestBody UpdateUserStatusDTO dto) {
-    	System.out.print("==================="+dto.getPhoneNumber());
         return ApiResponseDTO.ok(
                 userService.updateUserStatus(dto.getPhoneNumber(), dto.getStatus()),
                 "User status updated",

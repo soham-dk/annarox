@@ -90,8 +90,6 @@ export default function LoginPage() {
             setLoading(true);
             const res = await authService.login(form);
             const token = res.data.token;
-            console.log(token);
-
             localStorage.setItem("token", token);
             show("Logged in successfully!", "success");
             // setTimeout(() => router.push("/dashboard"), 1000);

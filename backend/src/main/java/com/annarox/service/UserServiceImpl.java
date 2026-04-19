@@ -40,7 +40,6 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.USER);
         user.setStatus(UserStatus.INACTIVE);
         
-        System.out.print("PHONE NUMBER IN SERVICE IMPL AFTER MAPPING TO"+user.getPhoneNumber());
 //        user.setPasswordHash(passwordEncoder.encode(userDTO.getPassword()));
         User registeredUser = userRepository.save(user);
         // 🔥 create wallet automatically

@@ -29,6 +29,14 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(ApiResponseDTO.error(request.getRequestURI(), ex.getMessage(), HttpStatus.BAD_REQUEST.value()));
 	}
+	
+	@ExceptionHandler(BadRequestException.class)
+	public ResponseEntity<ApiResponseDTO<?>> handleBadRequestException(BadRequestException ex,
+			HttpServletRequest request) {
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(ApiResponseDTO.error(request.getRequestURI(), ex.getMessage(), HttpStatus.BAD_REQUEST.value()));
+	}
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponseDTO<?>> handleGenericException(Exception ex, HttpServletRequest request) {

@@ -1,6 +1,8 @@
 package com.annarox.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +32,8 @@ public class RoundController {
 
 	@PostMapping("/{id}/close")
 	public ApiResponseDTO<?> close(@PathVariable Long id) {
+		System.out.println("User Authorities: " + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
+
 		roundService.closeRound(id);
 		return ApiResponseDTO.ok(null, "Round closed", 200);
 	}

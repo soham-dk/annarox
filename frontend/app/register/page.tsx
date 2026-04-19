@@ -22,8 +22,6 @@ export default function RegisterPage() {
     const handleRegister = async () => {
         // Mobile number regex: starts with 7-9 and exactly 10 digits
         const phoneRegex = /^[7-9]\d{9}$/;
-        console.log("Phone:", form.phoneNumber, form.phoneNumber.length);
-
         // Password regex:
         // Minimum 8 chars, at least 1 uppercase, 1 lowercase, 1 number, 1 special char
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_\-+=]).{8,}$/;

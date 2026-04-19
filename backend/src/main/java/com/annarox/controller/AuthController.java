@@ -28,7 +28,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ApiResponseDTO<?> login(@Valid @RequestBody UserLoginDTO loginDTO) {
-        System.err.println("LOGGED IN USER" + loginDTO.toString());
+//        System.err.println("LOGGED IN USER" + loginDTO.toString());
         AuthResponseDTO user = authService.login(loginDTO);
         return ApiResponseDTO.ok(user, "User logged in successfully!", HttpStatus.ACCEPTED.value());
     }

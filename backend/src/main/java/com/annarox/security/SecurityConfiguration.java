@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -47,17 +48,22 @@ public class SecurityConfiguration {
                 .permitAll()
                  //public APIs                
                 .requestMatchers("/api/v1/users/**").permitAll()
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("api/v1/rounds/**").permitAll()
-                .requestMatchers("/api/v1/wallet/**").permitAll()
-                .requestMatchers("/api/v1/bets/**").permitAll()    
-                .requestMatchers("api/v1/payment-requests/**").permitAll()
+                .requestMatchers("/api/v1/auth/login").permitAll()
+//                .requestMatchers("api/v1/rounds/**").permitAll()
+//                .requestMatchers("/api/v1/wallet/**").permitAll()
+//                .requestMatchers("/api/v1/bets/**").permitAll()    
+//                .requestMatchers("api/v1/payment-requests/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/rounds/current").hasAnyRole("USER", "ADMIN","MANAGER")
+                
+
+                .requestMatchers("/api/v1/rounds/*/close").hasRole("ADMIN")
                 // ADMIN APIs
                 .requestMatchers("/api/v1/rounds/**").hasRole("ADMIN")
                 
              // Authenticated users
-//                .requestMatchers("/api/v1/bets/**").authenticated()
-//                .requestMatchers("/api/v1/wallet/**").authenticated()
+                .requestMatchers("/api/v1/bets/**").authenticated()
+                .requestMatchers("/api/v1/wallet/**").authenticated()
+                .requestMatchers("/api/v1/payment-requests/**").authenticated()
                 
                 .requestMatchers("/error").permitAll()
                 

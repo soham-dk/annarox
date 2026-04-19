@@ -167,6 +167,11 @@ export default function DashboardPage() {
 
     // Show result banner when drawn
     const fetchData = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            router.replace("/login");
+            return;
+        }
         try {
             const res = await roundService.getCurrent();
             const round = res.data.data;
@@ -181,6 +186,7 @@ export default function DashboardPage() {
         const token = localStorage.getItem("token");
         if (!token) {
             router.replace("/login");
+            return;
         } else {
             setIsLoading(false);
         }
@@ -228,7 +234,6 @@ export default function DashboardPage() {
         setSelectedNumber(prev => prev === n ? null : n);
     };
 
-
     const handleSubmitBet = async () => {
         const tokens = parseInt(tokenInput, 10);
         if (selectedNumber === null) { show("Pick a number first.", "error"); return; }
@@ -236,19 +241,29 @@ export default function DashboardPage() {
         if (tokens > walletBalance) { show("Insufficient tokens in wallet.", "error"); return; }
         try {
             setSubmitting(true);
-            // TODO: replace with real API call
-            await betService.placeBet({ number: selectedNumber, tokens });
-            await new Promise(r => setTimeout(r, 700));
+
+            // Capture the successful response
+            const response = await betService.placeBet({ number: selectedNumber, tokens });
+
+            // Optional: Use a message from the backend SUCCESS response if it exists
+            const successMsg = response.data?.message || `Order placed on ${selectedNumber}!`;
+
             setWalletBalance(b => b - tokens);
             setPlacedBet({ number: selectedNumber, tokens, roundId: round!.id });
-            show(`Order placed on ${selectedNumber} for ${tokens} tokens!`, "success");
+            show(successMsg, "success");
             setTokenInput("");
-        } catch {
-            show("Failed to place order. Try again.", "error");
+
+        } catch (error: any) {
+            // Capture the response data from the ERROR (where your 400 message lives)
+            const errorResponse = error.response?.data;
+            const errorMessage = errorResponse?.message || "An unexpected error occurred.";
+
+            show(errorMessage, "error");
         } finally {
             setSubmitting(false);
         }
     };
+
 
     const handleWithdraw = async () => {
         const amt = parseInt(withdrawAmt, 10);
@@ -578,7 +593,7 @@ export default function DashboardPage() {
                                         />
                                         {/* Quick amounts */}
                                         <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                                            {[100, 200, 300, 400, 500].map(amt => (
+                                            {[10, 20, 50, 100, 150].map(amt => (
                                                 <button
                                                     key={amt}
                                                     onClick={() => setTokenInput(String(Math.min(amt, walletBalance)))}

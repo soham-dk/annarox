@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.annarox.dtos.AuthResponseDTO;
 import com.annarox.dtos.UserLoginDTO;
 import com.annarox.dtos.UserResponseDTO;
+import com.annarox.exception.UserAuthenticationException;
 import com.annarox.exception.UserDoesNotExist;
 import com.annarox.repository.AuthRepository;
 import com.annarox.repository.UserRepository;
@@ -37,11 +38,11 @@ public class AuthServiceImpl implements AuthService {
                         "User does not exist with phone " + loginDTO.getPhoneNumber()));
 
         if (!loginDTO.getPassword().equals(user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new UserAuthenticationException("Invalid credentials");
         }
 
         String token = jwtService.generateToken(user.getPhoneNumber());
-        System.out.println("TOKEN "+token);
+//        System.out.println("TOKEN "+token);
 
         return AuthResponseDTO.builder()
                 .token(token)

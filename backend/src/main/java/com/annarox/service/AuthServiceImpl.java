@@ -6,12 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.annarox.dtos.AuthResponseDTO;
 import com.annarox.dtos.UserLoginDTO;
+import com.annarox.dtos.UserResponseDTO;
 import com.annarox.exception.UserDoesNotExist;
 import com.annarox.repository.AuthRepository;
 import com.annarox.repository.UserRepository;
 import com.annarox.security.JwtService;
 import com.annarox.entity.User;
-import com.annarox.mapper.UserMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,8 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class AuthServiceImpl implements AuthService {
 
     private final AuthRepository authRepository;
-
-    private final UserMapper userMapper;
 
     private final PasswordEncoder passwordEncoder;
     
@@ -47,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
 
         return AuthResponseDTO.builder()
                 .token(token)
-                .user(userMapper.toDTO(user))
+                .user(mapToDTO(user))
                 .build();
     }
     
@@ -69,4 +67,12 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
     }
 
+    private UserResponseDTO mapToDTO(User user) {
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .phoneNumber(user.getPhoneNumber())
+                .status(user.getStatus())
+                .role(user.getRole())
+                .build();
+    }
 }

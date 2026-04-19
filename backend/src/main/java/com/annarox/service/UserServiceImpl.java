@@ -1,9 +1,5 @@
 package com.annarox.service;
 
-import lombok.RequiredArgsConstructor;
-
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,8 +14,10 @@ import com.annarox.enums.Role;
 import com.annarox.enums.UserStatus;
 import com.annarox.exception.UserAlreadyExistsException;
 import com.annarox.exception.UserDoesNotExist;
-import com.annarox.mapper.UserMapper;
 import com.annarox.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+
 
 @RequiredArgsConstructor
 @Service
@@ -27,7 +25,6 @@ import com.annarox.repository.UserRepository;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper; // Mapstruct mapper injection
     private final PasswordEncoder passwordEncoder;
     private final WalletService walletService;
     @Override
@@ -37,13 +34,19 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByPhoneNumber(userDTO.getPhoneNumber())) {
             throw new UserAlreadyExistsException("User with phone number " + userDTO.getPhoneNumber() + " already exists!");
         }
-        User user = userMapper.toEntity(userDTO);
+        User user = new User();
+        user.setPhoneNumber(userDTO.getPhoneNumber());
+        user.setPassword(userDTO.getPassword());
+        user.setRole(Role.USER);
+        user.setStatus(UserStatus.INACTIVE);
+        
+        System.out.print("PHONE NUMBER IN SERVICE IMPL AFTER MAPPING TO"+user.getPhoneNumber());
 //        user.setPasswordHash(passwordEncoder.encode(userDTO.getPassword()));
         User registeredUser = userRepository.save(user);
         // 🔥 create wallet automatically
         walletService.createWallet(registeredUser);
 
-        return userMapper.toDTO(registeredUser);
+        return mapToDTO(registeredUser);
     }
     
     @Override

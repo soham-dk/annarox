@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/services/authService";
 import { useToast, Toast } from "@/hooks/useToast";
+import Link from "next/link";
 
 // ─── Toast UI ────────────────────────────────────────────────────────────────
 
@@ -61,9 +62,29 @@ export default function LoginPage() {
     const handleChange = (e: any) => setForm({ ...form, [e.target.name]: e.target.value });
 
     const handleLogin = async () => {
+        // Mobile number regex: starts with 7-9 and exactly 10 digits
+        const phoneRegex = /^[7-9]\d{9}$/;
+
+        // Password regex:
+        // Minimum 8 chars, at least 1 uppercase, 1 lowercase, 1 number, 1 special char
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_\-+=]).{8,}$/;
+
         if (!form.phoneNumber || !form.password) {
             show("Please fill in all fields.", "error");
             return;
+        }
+
+        // Mobile validation
+        if (!phoneRegex.test(form.phoneNumber)) {
+            show("Enter valid mobile number.", "error");
+            return;
+        }
+
+        // Password validation
+        if (!passwordRegex.test(form.password)) {
+            show("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.", "error");
+            return;
+
         }
         try {
             setLoading(true);
@@ -212,7 +233,7 @@ export default function LoginPage() {
                                 <input
                                     name="password"
                                     type={showPass ? "text" : "password"}
-                                    placeholder="Enter your password"
+                                    placeholder="Enter your password(e.g.Pass@123)"
                                     className="auth-input"
                                     style={{ paddingRight: 42 }}
                                     onChange={handleChange}
@@ -254,12 +275,7 @@ export default function LoginPage() {
                     {/* Footer link */}
                     <p style={{ marginTop: 20, fontSize: 13.5, color: "#71717a", textAlign: "center" }}>
                         Don't have an account?{" "}
-                        <a href="/register" style={{ color: "#18181b", fontWeight: 600, textDecoration: "none" }}
-                            onMouseOver={e => (e.currentTarget.style.textDecoration = "underline")}
-                            onMouseOut={e => (e.currentTarget.style.textDecoration = "none")}
-                        >
-                            Create one
-                        </a>
+                        <Link href="/register">Create Account</Link>
                     </p>
 
                 </div>

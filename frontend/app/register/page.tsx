@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { authService } from "@/lib/services/authService";
 import { useToast, Toast } from "@/hooks/useToast";
 import { Toasts } from "../dashboard/page";
+import Link from "next/link";
 
 // ─── Register Page ───────────────────────────────────────────────────────────
 
@@ -19,8 +20,28 @@ export default function RegisterPage() {
     const handleChange = (e: any) => setForm({ ...form, [e.target.name]: e.target.value });
 
     const handleRegister = async () => {
+        // Mobile number regex: starts with 7-9 and exactly 10 digits
+        const phoneRegex = /^[7-9]\d{9}$/;
+        console.log("Phone:", form.phoneNumber, form.phoneNumber.length);
+
+        // Password regex:
+        // Minimum 8 chars, at least 1 uppercase, 1 lowercase, 1 number, 1 special char
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_\-+=]).{8,}$/;
+
         if (!form.phoneNumber || !form.password) {
             show("Please fill in all fields.", "error");
+            return;
+        }
+
+        // Mobile validation
+        if (!phoneRegex.test(form.phoneNumber)) {
+            show("Enter valid mobile number (10 digits, starts with 7-9).", "error");
+            return;
+        }
+
+        // Password validation
+        if (!passwordRegex.test(form.password)) {
+            show("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.", "error");
             return;
         }
         try {
@@ -128,9 +149,6 @@ export default function RegisterPage() {
                     <h1 style={{ fontSize: 24, fontWeight: 700, color: "#18181b", marginBottom: 6 }}>
                         Create an account
                     </h1>
-                    <p style={{ fontSize: 14, color: "#71717a", marginBottom: 28 }}>
-                        Get started — it only takes a moment.
-                    </p>
 
                     {/* Fields */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 16 }}>
@@ -156,7 +174,7 @@ export default function RegisterPage() {
                                 <input
                                     name="password"
                                     type={showPass ? "text" : "password"}
-                                    placeholder="Create a password"
+                                    placeholder="Enter a password(e.g.Pass@123)"
                                     className="auth-input"
                                     style={{ paddingRight: 42 }}
                                     onChange={handleChange}
@@ -194,14 +212,6 @@ export default function RegisterPage() {
 
                     </div>
 
-                    {/* Terms note */}
-                    <p style={{ fontSize: 12, color: "#a1a1aa", marginBottom: 16, lineHeight: 1.6 }}>
-                        By creating an account you agree to our{" "}
-                        <a href="/terms" style={{ color: "#71717a", textDecoration: "underline" }}>Terms of Service</a>
-                        {" "}and{" "}
-                        <a href="/privacy" style={{ color: "#71717a", textDecoration: "underline" }}>Privacy Policy</a>.
-                    </p>
-
                     {/* Submit */}
                     <button className="auth-btn" onClick={handleRegister} disabled={loading}>
                         {loading ? "Creating account…" : "Create account"}
@@ -210,12 +220,7 @@ export default function RegisterPage() {
                     {/* Footer link */}
                     <p style={{ marginTop: 20, fontSize: 13.5, color: "#71717a", textAlign: "center" }}>
                         Already have an account?{" "}
-                        <a href="/login" style={{ color: "#18181b", fontWeight: 600, textDecoration: "none" }}
-                            onMouseOver={e => (e.currentTarget.style.textDecoration = "underline")}
-                            onMouseOut={e => (e.currentTarget.style.textDecoration = "none")}
-                        >
-                            Sign in
-                        </a>
+                        <Link href="/login">Log In</Link>
                     </p>
 
                 </div>

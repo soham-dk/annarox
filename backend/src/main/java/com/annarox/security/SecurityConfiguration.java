@@ -79,7 +79,8 @@ public class SecurityConfiguration {
         config.setAllowCredentials(true);
 
         config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "https://annarox.vercel.app"
         ));
 
         config.setAllowedMethods(Arrays.asList(

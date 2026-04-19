@@ -5,10 +5,9 @@ import { authService } from "./authService";
 const token = authService.getToken();
 export const walletService = {
   getWallet: async () => {
-    // Get the token you saved during login/register
     const res = await axios.get(`${BASE_URL}/wallet`, {
       headers: {
-        Authorization: `Bearer ${token}`, // Standard JWT format
+        Authorization: `Bearer ${token}`, 
       },
     });
     return res.data;
@@ -16,7 +15,7 @@ export const walletService = {
   getUserByMobile: async (phoneNumber: string) => {
     return await axios.get(`/users/mobile/${phoneNumber}`, {
       headers: {
-        Authorization: `Bearer ${token}`, // Standard JWT format
+        Authorization: `Bearer ${token}`, 
       },
     });
   },
@@ -24,7 +23,7 @@ export const walletService = {
   withdraw: async (amount: { amount: any }) => {
     return await axios.post(`${BASE_URL}/payment-requests/withdraw`, amount, {
       headers: {
-        Authorization: `Bearer ${token}`, // Standard JWT format
+        Authorization: `Bearer ${token}`, 
       },
     });
   },

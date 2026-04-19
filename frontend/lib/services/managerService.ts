@@ -48,8 +48,6 @@ export const managerService = {
     });
   },
 
-  /** Withdraw / mark amount as paid out */
-  // Added BASE_URL here
   withdrawAmountPaid: (payload: WthdrawBalancePayload) => {
     return axios.post(`${BASE_URL}/wallet/withdraw`, payload, {
       headers: {

@@ -132,16 +132,6 @@ function NumberTile({
     );
 }
 
-// ─── Mock data helpers ────────────────────────────────────────────────────────
-
-const MOCK_ROUND: Round = {
-    id: "round-1",
-    name: "Evening draw",
-    status: "open",
-    closesAt: new Date(Date.now() + 8 * 60 * 1000),
-    winningNumber: null,
-};
-
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -149,15 +139,15 @@ export default function DashboardPage() {
     const { toasts, show, remove } = useToast();
 
     // User & wallet state
-    const [walletBalance, setWalletBalance] = useState(500);
+    const [walletBalance, setWalletBalance] = useState(0);
     const [withdrawing, setWithdrawing] = useState(false);
     const [showWithdraw, setShowWithdraw] = useState(false);
     const [withdrawAmt, setWithdrawAmt] = useState("");
     const [isLoading, setIsLoading] = useState(true);
 
     // Round state
-    const [round, setRound] = useState<Round>(MOCK_ROUND);
-    const countdown = useCountdown(round.status === "open" ? round.closesAt : null);
+    const [round, setRound] = useState<Round | null>(null);
+    const countdown = useCountdown(round?.status === "open" ? round.closesAt : null);
 
     // Bet state
     const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
@@ -170,10 +160,10 @@ export default function DashboardPage() {
     // Result state
     const [resultVisible, setResultVisible] = useState(false);
 
-    const isOpen = round.status === "open";
-    const isDrawn = round.status === "drawn";
-    const userWon = isDrawn && placedBet !== null && placedBet.number === round.winningNumber;
-    const userLost = isDrawn && placedBet !== null && placedBet.number !== round.winningNumber;
+    const isOpen = round?.status === "open";
+    const isDrawn = round?.status === "drawn";
+    const userWon = isDrawn && placedBet !== null && placedBet.number === round?.winningNumber;
+    const userLost = isDrawn && placedBet !== null && placedBet.number !== round?.winningNumber;
 
     // Show result banner when drawn
     const fetchData = async () => {
@@ -250,7 +240,7 @@ export default function DashboardPage() {
             await betService.placeBet({ number: selectedNumber, tokens });
             await new Promise(r => setTimeout(r, 700));
             setWalletBalance(b => b - tokens);
-            setPlacedBet({ number: selectedNumber, tokens, roundId: round.id });
+            setPlacedBet({ number: selectedNumber, tokens, roundId: round!.id });
             show(`Order placed on ${selectedNumber} for ${tokens} tokens!`, "success");
             setTokenInput("");
         } catch {
@@ -277,12 +267,6 @@ export default function DashboardPage() {
         } finally {
             setWithdrawing(false);
         }
-    };
-
-    // Demo: simulate admin drawing (for testing — remove in production)
-    const simulateDraw = () => {
-        const winning = Math.floor(Math.random() * 10);
-        setRound(r => ({ ...r, status: "drawn", winningNumber: winning, closesAt: null }));
     };
 
     return (
@@ -486,178 +470,192 @@ export default function DashboardPage() {
                     </div>
 
                     {/* ── Game card ───────────────────────────────────── */}
-                    <div style={{
-                        background: "#fff", border: "1px solid #e4e4e7", borderRadius: 16,
-                        overflow: "hidden",
-                    }}>
-                        {/* Card header */}
+                    {round && (
                         <div style={{
-                            padding: "16px 18px", borderBottom: "1px solid #f4f4f5",
-                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            background: "#fff", border: "1px solid #e4e4e7", borderRadius: 16,
+                            overflow: "hidden",
                         }}>
-                            <div>
-                                <p style={{ fontSize: 11, color: "#a1a1aa", fontWeight: 600, letterSpacing: "0.04em" }}>
-                                    CURRENT ROUND
-                                </p>
-                                <p style={{ fontSize: 15, fontWeight: 700, color: "#18181b", marginTop: 1 }}>{round.name}</p>
-                            </div>
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
-                                <StatusBadge status={round.status} />
-                                {isOpen && countdown && (
-                                    <p style={{ fontSize: 11, color: "#71717a", fontWeight: 500 }}>
-                                        Closes in <strong style={{ color: "#18181b", fontVariantNumeric: "tabular-nums" }}>{countdown}</strong>
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Result banner */}
-                        {resultVisible && isDrawn && (
-                            <div className="result-banner" style={{
-                                margin: "16px 18px 0",
-                                padding: "16px",
-                                borderRadius: 12,
-                                background: userWon ? "#f0fdf4" : "#fef2f2",
-                                border: `1px solid ${userWon ? "#bbf7d0" : "#fecaca"}`,
-                                display: "flex", alignItems: "center", gap: 14,
+                            {/* Card header */}
+                            <div style={{
+                                padding: "16px 18px", borderBottom: "1px solid #f4f4f5",
+                                display: "flex", alignItems: "center", justifyContent: "space-between",
                             }}>
-                                <div style={{
-                                    width: 44, height: 44, borderRadius: 10,
-                                    background: userWon ? "#22c55e" : "#ef4444",
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                    fontSize: 22, flexShrink: 0,
-                                }} className={userWon ? "win-number" : ""}>
-                                    {round.winningNumber}
-                                </div>
                                 <div>
-                                    <p style={{
-                                        fontSize: 14, fontWeight: 700,
-                                        color: userWon ? "#166534" : "#991b1b",
-                                        marginBottom: 2,
-                                    }}>
-                                        {userWon ? "You won! 🎉" : placedBet ? "Better luck next time." : "Draw complete."}
+                                    <p style={{ fontSize: 11, color: "#a1a1aa", fontWeight: 600, letterSpacing: "0.04em" }}>
+                                        CURRENT ROUND
                                     </p>
-                                    <p style={{ fontSize: 12.5, color: userWon ? "#15803d" : "#b91c1c" }}>
-                                        {userWon
-                                            ? `+${(placedBet!.tokens * 2).toLocaleString()} tokens credited to wallet`
-                                            : placedBet
-                                                ? `You picked ${placedBet.number}. Winning number was ${round.winningNumber}.`
-                                                : `Winning number was ${round.winningNumber}.`}
-                                    </p>
+                                    <p style={{ fontSize: 15, fontWeight: 700, color: "#18181b", marginTop: 1 }}>{round.name}</p>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+                                    <StatusBadge status={round.status} />
+                                    {isOpen && countdown && (
+                                        <p style={{ fontSize: 11, color: "#71717a", fontWeight: 500 }}>
+                                            Closes in <strong style={{ color: "#18181b", fontVariantNumeric: "tabular-nums" }}>{countdown}</strong>
+                                        </p>
+                                    )}
                                 </div>
                             </div>
-                        )}
 
-                        {/* Number grid */}
-                        <div style={{ padding: "16px 18px" }}>
-                            <p style={{ fontSize: 12, color: "#71717a", fontWeight: 500, marginBottom: 10 }}>
-                                {isOpen && !placedBet
-                                    ? "Pick your number"
-                                    : placedBet && !isDrawn
-                                        ? `Your order: ${placedBet.number} · ${placedBet.tokens} tokens`
-                                        : isDrawn
-                                            ? "Round result"
-                                            : "Ordering is closed"}
-                            </p>
-                            <div className="num-grid">
-                                {Array.from({ length: 10 }, (_, i) => (
-                                    <NumberTile
-                                        key={i}
-                                        num={i}
-                                        selected={selectedNumber === i || placedBet?.number === i}
-                                        winning={
-                                            isDrawn && round.winningNumber !== null
-                                                ? i === round.winningNumber
-                                                : null
-                                        }
-                                        betPlaced={!!placedBet && placedBet.number !== i}
-                                        disabled={!isOpen || !!placedBet}
-                                        onSelect={handleSelectNumber}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Bet form — only show if round is open and no order placed yet */}
-                        {isOpen && !placedBet && (
-                            <div style={{ padding: "0 18px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
-                                <div style={{ position: "relative" }}>
-                                    <input
-                                        className="token-input"
-                                        type="number"
-                                        placeholder="Tokens"
-                                        value={tokenInput}
-                                        onChange={e => setTokenInput(e.target.value)}
-                                        min={1}
-                                        max={walletBalance}
-                                    />
-                                    {/* Quick amounts */}
-                                    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                                        {[100, 200, 300, 400, 500].map(amt => (
-                                            <button
-                                                key={amt}
-                                                onClick={() => setTokenInput(String(Math.min(amt, walletBalance)))}
-                                                style={{
-                                                    flex: 1, padding: "5px 0", background: "#f4f4f5",
-                                                    border: "1px solid #e4e4e7", borderRadius: 7,
-                                                    fontSize: 12, fontWeight: 600, fontFamily: "'Figtree', sans-serif",
-                                                    color: "#3f3f46", cursor: "pointer",
-                                                    transition: "background 0.12s",
-                                                }}
-                                                onMouseOver={e => (e.currentTarget.style.background = "#e4e4e7")}
-                                                onMouseOut={e => (e.currentTarget.style.background = "#f4f4f5")}
-                                            >
-                                                {amt}
-                                            </button>
-                                        ))}
+                            {/* Result banner */}
+                            {resultVisible && isDrawn && (
+                                <div className="result-banner" style={{
+                                    margin: "16px 18px 0",
+                                    padding: "16px",
+                                    borderRadius: 12,
+                                    background: userWon ? "#f0fdf4" : "#fef2f2",
+                                    border: `1px solid ${userWon ? "#bbf7d0" : "#fecaca"}`,
+                                    display: "flex", alignItems: "center", gap: 14,
+                                }}>
+                                    <div style={{
+                                        width: 44, height: 44, borderRadius: 10,
+                                        background: userWon ? "#22c55e" : "#ef4444",
+                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                        fontSize: 22, flexShrink: 0,
+                                    }} className={userWon ? "win-number" : ""}>
+                                        {round.winningNumber}
+                                    </div>
+                                    <div>
+                                        <p style={{
+                                            fontSize: 14, fontWeight: 700,
+                                            color: userWon ? "#166534" : "#991b1b",
+                                            marginBottom: 2,
+                                        }}>
+                                            {userWon ? "You won! 🎉" : placedBet ? "Better luck next time." : "Draw complete."}
+                                        </p>
+                                        <p style={{ fontSize: 12.5, color: userWon ? "#15803d" : "#b91c1c" }}>
+                                            {userWon
+                                                ? `+${(placedBet!.tokens * 2).toLocaleString()} tokens credited to wallet`
+                                                : placedBet
+                                                    ? `You picked ${placedBet.number}. Winning number was ${round.winningNumber}.`
+                                                    : `Winning number was ${round.winningNumber}.`}
+                                        </p>
                                     </div>
                                 </div>
-                                <button
-                                    className="primary-btn"
-                                    onClick={handleSubmitBet}
-                                    disabled={submitting || selectedNumber === null || !tokenInput}
-                                >
-                                    {submitting
-                                        ? "Placing order…"
-                                        : selectedNumber !== null && tokenInput
-                                            ? `Place order · ${tokenInput} tokens on ${selectedNumber}`
-                                            : "Place order"}
-                                </button>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Closed state nudge */}
-                        {round.status === "closed" && !placedBet && (
-                            <div style={{ padding: "0 18px 18px" }}>
-                                <div style={{
-                                    padding: "12px 14px", borderRadius: 10,
-                                    background: "#fffbeb", border: "1px solid #fde68a",
-                                    fontSize: 13, color: "#92400e", fontWeight: 500,
-                                }}>
-                                    Ordering is closed for this round. Wait for the draw.
+                            {/* Number grid */}
+                            <div style={{ padding: "16px 18px" }}>
+                                <p style={{ fontSize: 12, color: "#71717a", fontWeight: 500, marginBottom: 10 }}>
+                                    {isOpen && !placedBet
+                                        ? "Pick your number"
+                                        : placedBet && !isDrawn
+                                            ? `Your order: ${placedBet.number} · ${placedBet.tokens} tokens`
+                                            : isDrawn
+                                                ? "Round result"
+                                                : "Ordering is closed"}
+                                </p>
+                                <div className="num-grid">
+                                    {Array.from({ length: 10 }, (_, i) => (
+                                        <NumberTile
+                                            key={i}
+                                            num={i}
+                                            selected={selectedNumber === i || placedBet?.number === i}
+                                            winning={
+                                                isDrawn && round.winningNumber !== null
+                                                    ? i === round.winningNumber
+                                                    : null
+                                            }
+                                            betPlaced={!!placedBet && placedBet.number !== i}
+                                            disabled={!isOpen || !!placedBet}
+                                            onSelect={handleSelectNumber}
+                                        />
+                                    ))}
                                 </div>
                             </div>
-                        )}
 
-                        {/* Order placed — waiting */}
-                        {placedBet && !isDrawn && (
-                            <div style={{ padding: "0 18px 18px" }}>
-                                <div style={{
-                                    padding: "12px 14px", borderRadius: 10,
-                                    background: "#f8fafc", border: "1px solid #e2e8f0",
-                                    fontSize: 13, color: "#334155", fontWeight: 500,
-                                    display: "flex", alignItems: "center", gap: 8,
-                                }}>
-                                    <span style={{
-                                        display: "inline-block", width: 8, height: 8, borderRadius: "50%",
-                                        background: "#94a3b8",
-                                        animation: "pulse-ring 1.5s ease-out infinite",
-                                    }} />
-                                    Order confirmed. Waiting for admin to draw…
+                            {/* Bet form — only show if round is open and no order placed yet */}
+                            {isOpen && !placedBet && (
+                                <div style={{ padding: "0 18px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
+                                    <div style={{ position: "relative" }}>
+                                        <input
+                                            className="token-input"
+                                            type="number"
+                                            placeholder="Tokens"
+                                            value={tokenInput}
+                                            onChange={e => setTokenInput(e.target.value)}
+                                            min={1}
+                                            max={walletBalance}
+                                        />
+                                        {/* Quick amounts */}
+                                        <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                                            {[100, 200, 300, 400, 500].map(amt => (
+                                                <button
+                                                    key={amt}
+                                                    onClick={() => setTokenInput(String(Math.min(amt, walletBalance)))}
+                                                    style={{
+                                                        flex: 1, padding: "5px 0", background: "#f4f4f5",
+                                                        border: "1px solid #e4e4e7", borderRadius: 7,
+                                                        fontSize: 12, fontWeight: 600, fontFamily: "'Figtree', sans-serif",
+                                                        color: "#3f3f46", cursor: "pointer",
+                                                        transition: "background 0.12s",
+                                                    }}
+                                                    onMouseOver={e => (e.currentTarget.style.background = "#e4e4e7")}
+                                                    onMouseOut={e => (e.currentTarget.style.background = "#f4f4f5")}
+                                                >
+                                                    {amt}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <button
+                                        className="primary-btn"
+                                        onClick={handleSubmitBet}
+                                        disabled={submitting || selectedNumber === null || !tokenInput}
+                                    >
+                                        {submitting
+                                            ? "Placing order…"
+                                            : selectedNumber !== null && tokenInput
+                                                ? `Place order · ${tokenInput} tokens on ${selectedNumber}`
+                                                : "Place order"}
+                                    </button>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+
+                            {/* Closed state nudge */}
+                            {round.status === "closed" && !placedBet && (
+                                <div style={{ padding: "0 18px 18px" }}>
+                                    <div style={{
+                                        padding: "12px 14px", borderRadius: 10,
+                                        background: "#fffbeb", border: "1px solid #fde68a",
+                                        fontSize: 13, color: "#92400e", fontWeight: 500,
+                                    }}>
+                                        Ordering is closed for this round. Wait for the draw.
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Order placed — waiting */}
+                            {placedBet && !isDrawn && (
+                                <div style={{ padding: "0 18px 18px" }}>
+                                    <div style={{
+                                        padding: "12px 14px", borderRadius: 10,
+                                        background: "#f8fafc", border: "1px solid #e2e8f0",
+                                        fontSize: 13, color: "#334155", fontWeight: 500,
+                                        display: "flex", alignItems: "center", gap: 8,
+                                    }}>
+                                        <span style={{
+                                            display: "inline-block", width: 8, height: 8, borderRadius: "50%",
+                                            background: "#94a3b8",
+                                            animation: "pulse-ring 1.5s ease-out infinite",
+                                        }} />
+                                        Order confirmed. Waiting for admin to draw…
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* No round available */}
+                    {!round && !loading && (
+                        <div style={{
+                            background: "#fff", border: "1px solid #e4e4e7", borderRadius: 16,
+                            padding: "32px 24px", textAlign: "center",
+                        }}>
+                            <p style={{ fontSize: 14, color: "#71717a", fontWeight: 500 }}>
+                                No active round at the moment. Check back soon.
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
         </>

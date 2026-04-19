@@ -30,14 +30,14 @@ export const roundService = {
   getCurrent: () =>
     axios.get(`${BASE_URL}/rounds/current`, {
       headers: {
-        Authorization: `Bearer ${token}` // Standard JWT format
+        Authorization: `Bearer ${token}` 
       }
-    }), // you should expose this
+    }),
 
   getStats: (id: number) => {
     return axios.get(`${BASE_URL}/bets/stats/${id}`, {
       headers: {
-        Authorization: `Bearer ${token}` // Standard JWT format
+        Authorization: `Bearer ${token}` 
       }
     });
   },

@@ -94,7 +94,7 @@ export default function LoginPage() {
             show("Logged in successfully!", "success");
             // setTimeout(() => router.push("/dashboard"), 1000);
             const route = roleRoutes[res.data.user.role] || "/dashboard";
-            router.push(route);
+            router.replace(route);
         } catch (err: any) {
             show(err?.response?.data?.message || "Login failed. Try again.", "error");
         } finally {

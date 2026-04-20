@@ -131,7 +131,6 @@ function NumberTile({
         </button>
     );
 }
-
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -156,7 +155,6 @@ export default function DashboardPage() {
     const [placedBet, setPlacedBet] = useState<Bet | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
-
     // Result state
     const [resultVisible, setResultVisible] = useState(false);
 
@@ -165,32 +163,22 @@ export default function DashboardPage() {
     const userWon = isDrawn && placedBet !== null && placedBet.number === round?.winningNumber;
     const userLost = isDrawn && placedBet !== null && placedBet.number !== round?.winningNumber;
 
-    // Show result banner when drawn
-    const fetchData = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            router.replace("/login");
-            return;
-        }
-        try {
-            const res = await roundService.getCurrent();
-            const round = res.data.data;
-            setRound(round ? { ...round, status: round.status.toLowerCase() } : null);
-        } catch {
-            show("Failed to load round data.", "error");
-        } finally {
-            setLoading(false);
-        }
-    }
+    // ─── ✅ 1. AUTH CHECK (RUNS ONCE) ─────────────────────────────────────────
     useEffect(() => {
         const token = localStorage.getItem("token");
+
         if (!token) {
             router.replace("/login");
             return;
-        } else {
-            setIsLoading(false);
         }
-        if (isDrawn && placedBet) { setResultVisible(true); }
+
+        setIsLoading(false);
+    }, []);
+
+    // ─── ✅ 2. FETCH WALLET ───────────────────────────────────────────────────
+    useEffect(() => {
+        if (isLoading) return;
+
         const fetchBalance = async () => {
             try {
                 setLoading(true);
@@ -198,29 +186,50 @@ export default function DashboardPage() {
                 setWalletBalance(res.data.balance);
             } catch (error) {
                 console.error("Failed to fetch balance:", error);
-                authService.logout();
-                router.replace("/login");
+                show("Failed to load wallet", "error");
+                // ❌ removed logout
             } finally {
                 setLoading(false);
             }
         };
 
         fetchBalance();
-        fetchData();
+    }, [isLoading]);
+
+    // ─── ✅ 3. FETCH ROUND ────────────────────────────────────────────────────
+    useEffect(() => {
+        if (isLoading) return;
+
+        const fetchRound = async () => {
+            try {
+                const res = await roundService.getCurrent();
+                const round = res.data.data;
+                setRound(round ? { ...round, status: round.status.toLowerCase() } : null);
+            } catch {
+                show("Failed to load round data.", "error");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRound();
+    }, [isLoading]);
+
+    // ─── ✅ 4. RESULT VISIBILITY ──────────────────────────────────────────────
+    useEffect(() => {
+        if (isDrawn && placedBet) {
+            setResultVisible(true);
+        }
     }, [isDrawn, placedBet]);
 
+    // ─── LOADING SCREEN ───────────────────────────────────────────────────────
     if (isLoading) {
         return (
             <div className="h-screen w-full flex flex-col items-center justify-center bg-black">
-                {/* The Spinner */}
                 <div className="relative">
-                    {/* Outer Ring */}
                     <div className="w-12 h-12 rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
-                    {/* Spinning Ring */}
                     <div className="absolute top-0 left-0 w-12 h-12 rounded-full border-4 border-black dark:border-white border-t-transparent animate-spin"></div>
                 </div>
-
-                {/* Optional Loading Text */}
                 <p className="mt-4 text-sm font-medium text-gray-500 dark:text-gray-400 animate-pulse">
                     Verifying session...
                 </p>
@@ -228,6 +237,7 @@ export default function DashboardPage() {
         );
     }
 
+    // ─── HANDLERS (UNCHANGED) ─────────────────────────────────────────────────
 
     const handleSelectNumber = (n: number) => {
         if (!isOpen || placedBet) return;
@@ -237,15 +247,12 @@ export default function DashboardPage() {
     const handleSubmitBet = async () => {
         const tokens = parseInt(tokenInput, 10);
         if (selectedNumber === null) { show("Pick a number first.", "error"); return; }
-        // if (!tokens || tokens < 1) { show("Enter a valid token amount.", "error"); return; }
         if (tokens > walletBalance) { show("Insufficient tokens in wallet.", "error"); return; }
+
         try {
             setSubmitting(true);
-
-            // Capture the successful response
             const response = await betService.placeBet({ number: selectedNumber, tokens });
 
-            // Optional: Use a message from the backend SUCCESS response if it exists
             const successMsg = response.data?.message || `Order placed on ${selectedNumber}!`;
 
             setWalletBalance(b => b - tokens);
@@ -254,21 +261,18 @@ export default function DashboardPage() {
             setTokenInput("");
 
         } catch (error: any) {
-            // Capture the response data from the ERROR (where your 400 message lives)
-            const errorResponse = error.response?.data;
-            const errorMessage = errorResponse?.message || "An unexpected error occurred.";
-
+            const errorMessage = error.response?.data?.message || "An unexpected error occurred.";
             show(errorMessage, "error");
         } finally {
             setSubmitting(false);
         }
     };
 
-
     const handleWithdraw = async () => {
         const amt = parseInt(withdrawAmt, 10);
         if (!amt || amt < 1) { show("Enter a valid amount.", "error"); return; }
         if (amt > walletBalance) { show("Amount exceeds balance.", "error"); return; }
+
         try {
             setWithdrawing(true);
             await walletService.withdraw({ amount: amt });
@@ -283,7 +287,6 @@ export default function DashboardPage() {
             setWithdrawing(false);
         }
     };
-
     return (
         <>
             <style>{`

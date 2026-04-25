@@ -4,13 +4,11 @@ import { BASE_URL } from "../config";
 export const authService = {
   login: async (payload: { phoneNumber: string; password: string }) => {
     const res = await axios.post(`${BASE_URL}/auth/login`, payload);
-
     return res.data;
   },
 
   register: async (payload: { phoneNumber: string; password: string }) => {
     const res = await axios.post(`${BASE_URL}/users/register`, payload);
-
     return res.data;
   },
 

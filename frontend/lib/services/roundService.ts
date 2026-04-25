@@ -4,7 +4,7 @@ import axios from "axios";
 import { BASE_URL } from "../config";
 import { authService } from "./authService";
 
-const token = authService.getToken();
+// const token = authService.getToken();
 export const roundService = {
   open: (name: string) =>
     axios.post(
@@ -12,7 +12,7 @@ export const roundService = {
       { name },
       {
         headers: {
-          Authorization: `Bearer ${token}`, // Standard JWT format
+          Authorization: `Bearer ${authService.getToken()}`, // Standard JWT format
         },
       },
     ),
@@ -23,7 +23,7 @@ export const roundService = {
       {},
       {
         headers: {
-          Authorization: `Bearer ${token}`, // Standard JWT format
+          Authorization: `Bearer ${authService.getToken()}`, // Standard JWT format
         },
       },
     ),
@@ -34,7 +34,7 @@ export const roundService = {
       { winningNumber },
       {
         headers: {
-          Authorization: `Bearer ${token}`, // Standard JWT format
+          Authorization: `Bearer ${authService.getToken()}`, // Standard JWT format
         },
       },
     ),
@@ -42,14 +42,14 @@ export const roundService = {
   getCurrent: () =>
     axios.get(`${BASE_URL}/rounds/current`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authService.getToken()}`,
       },
     }),
 
   getStats: (id: number) => {
     return axios.get(`${BASE_URL}/bets/stats/${id}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authService.getToken()}`,
       },
     });
   },

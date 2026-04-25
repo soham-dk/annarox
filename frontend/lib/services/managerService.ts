@@ -17,14 +17,14 @@ export interface WthdrawBalancePayload {
   userId: number;
   amount: number;
 }
-const token = authService.getToken();
+// const token = authService.getToken();
 
 export const managerService = {
   /** Fetch all users */
   getUsers: () =>
     axios.get(`${BASE_URL}/users`, {
       headers: {
-        Authorization: `Beare ${token}`,
+        Authorization: `Beare ${authService.getToken()}`,
       },
     }),
 
@@ -33,7 +33,7 @@ export const managerService = {
   addMoney: (payload: AddBalancePayload) => {
     return axios.post(`${BASE_URL}/wallet/add`, payload, {
       headers: {
-        Authorization: `Bearer ${token}`, // Standard JWT format
+        Authorization: `Bearer ${authService.getToken()}`, // Standard JWT format
       },
     });
   },
@@ -43,7 +43,7 @@ export const managerService = {
   updateStatus: (payload: UpdateStatusPayload) => {
     return axios.post(`${BASE_URL}/users/status`, payload, {
       headers: {
-        Authorization: `Bearer ${token}`, // Standard JWT format
+        Authorization: `Bearer ${authService.getToken()}`, // Standard JWT format
       },
     });
   },
@@ -51,7 +51,7 @@ export const managerService = {
   withdrawAmountPaid: (payload: WthdrawBalancePayload) => {
     return axios.post(`${BASE_URL}/wallet/withdraw`, payload, {
       headers: {
-        Authorization: `Bearer ${token}`, // Standard JWT format
+        Authorization: `Bearer ${authService.getToken()}`, // Standard JWT format
       },
     });
   },
@@ -59,7 +59,7 @@ export const managerService = {
   getWithdrawalRequests: () => {
     return axios.get(`${BASE_URL}/payment-requests/pending`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authService.getToken()}`,
       },
     });
   },
@@ -70,7 +70,7 @@ export const managerService = {
       { status },
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authService.getToken()}`,
         },
       },
     );
